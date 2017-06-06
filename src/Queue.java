@@ -17,10 +17,10 @@ public class Queue<Item> implements Iterable<Item> {
      * Initializes an empty queue.
      */
     public Queue() {
-        first = null;
-        last  = null;
-        numElements = 0;
-        queueSize = 5;
+        this.first = null;
+        this.last  = null;
+        this.numElements = 0;
+        this.queueSize = 5;
     }
 
     public boolean isEmpty() {
@@ -40,6 +40,11 @@ public class Queue<Item> implements Iterable<Item> {
     public Item peek() {
         if (isEmpty()) throw new NoSuchElementException("Queue underflow");
         return first.item;
+    }
+
+    public Item peek_tail() {
+        if (isEmpty()) throw new NoSuchElementException("Queue underflow");
+        return last.item;
     }
 
     /**
@@ -78,6 +83,7 @@ public class Queue<Item> implements Iterable<Item> {
         first = first.next;
         numElements--;
         if (isEmpty()) last = null;   // to avoid loitering
+        else { first.previous = null; }
         //return item;
     }
 
