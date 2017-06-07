@@ -1,8 +1,10 @@
 import java.util.Arrays;
+import java.util.List;
 
 public class InitialGrids {
 
     private Grid [][] map;
+    private List<Grid> gridList;
     private static final double GRID_LENGTH = 10.0;
 
 //    public InitialGrids() {
@@ -58,6 +60,7 @@ public class InitialGrids {
 
 //        map = new Grid[num_grids_each_line][num_grids_each_line];
         this.map = new Grid[][]{{A1, A2, A3, A4}, {B1, B2, B3, B4}, {C1, C2, C3, C4}, {D1, D2, D3, D4}};
+        this.gridList = Arrays.asList(A1, A2, A3, A4, B4, B3, B2, B1, C1, C2, C3, C4, D4, D3, D2, D1);
 //        map[0] = {A1, A2, A3, A4};
 //        map[1] = {B1, B2, B3, B4};
 //        map[2] = {C1, C2, C3, C4};
@@ -66,5 +69,9 @@ public class InitialGrids {
 
     public Grid [][] getMap() {
         return map;
+    }
+
+    public List<Grid> getGridList() {
+        return gridList;
     }
 }
