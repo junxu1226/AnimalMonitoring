@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -7,14 +8,18 @@ public class Animal{
     private List<AnimalPoint> trajectory;
 
     public Animal(String animalID) {
+
         this.animalID = animalID;
+        this.trajectory = new ArrayList<AnimalPoint>();
     }
 
     class AnimalPoint {
+        String animalID;
         double X;
         double Y;
         Date date;
-        public AnimalPoint(double X, double Y, Date date) {
+        public AnimalPoint(String animalID, double X, double Y, Date date) {
+            this.animalID = animalID;
             this.X = X;
             this.Y = Y;
             this.date = date;

@@ -1,6 +1,8 @@
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.List;
 
 public class Queue<Item> implements Iterable<Item> {
     private Node<Item> first;    // beginning of queue
@@ -60,13 +62,9 @@ public class Queue<Item> implements Iterable<Item> {
         last.previous = null;
         if (isEmpty()) first = last;
         else {
-            if (numElements >= queueSize) {
-                dequeue();
-            }
-            else {
-                oldlast.next = last;
-                last.previous = oldlast;
-            }
+            if (numElements >= queueSize) { dequeue(); }
+            oldlast.next = last;
+            last.previous = oldlast;
         }
         numElements++;
     }
@@ -99,6 +97,16 @@ public class Queue<Item> implements Iterable<Item> {
             s.append(' ');
         }
         return s.toString();
+    }
+
+    public List<Item> toList() {
+        List<Item> list = new ArrayList<>();
+        Node<Item> current = first;
+        while(current!= null) {
+            list.add(current.item);
+            current = current.next;
+        }
+        return list;
     }
 
     /**

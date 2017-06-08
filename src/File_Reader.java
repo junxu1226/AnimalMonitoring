@@ -12,17 +12,17 @@ public class File_Reader {
 
 
     List<Animal> animalList;
+    Animal FA = new Animal("FA");
+    Animal FB = new Animal("FB");
 
     Date theBeginTime = new Date(113, 01, 01, 00, 00, 00);
-    Date theEndTime = new Date(113, 02, 5, 00, 00, 00);
+    Date theEndTime = new Date(113, 06, 5, 00, 00, 00);
 
     public File_Reader() {
         File f = new File("Leopard11.txt");
-        Animal FA = new Animal("FA");
-        Animal FB = new Animal("FB");
-
         try {
             Scanner s = new Scanner(f);
+//            System.out.println("just for test");
             while(s.hasNextLine()){
                 s.next();s.next();s.next();
 
@@ -32,26 +32,28 @@ public class File_Reader {
                 double yCoordinate = s.nextDouble();
                 String animalID= s.next();
                 Date d = new Date(year-1900, month-1, day, hours, minutes);
-                if (d.before(theBeginTime)||d.after(theEndTime)){ continue; }
 
+                if (d.before(theBeginTime)||d.after(theEndTime)){ continue; }
+//                Animal.AnimalPoint point = new Animal.AnimalPoint(animalID, xCoordinate, yCoordinate, d);
                 if (animalID.contentEquals("FA")){
 
                     xCoordinate = (xCoordinate - 21.820000) * (1000.00 / 0.09);
                     yCoordinate = (yCoordinate - 26.927000) * (1000.00 / 0.06);
-                    FA.addPoint(FA.new AnimalPoint(xCoordinate, yCoordinate, d));
+                    FA.addPoint(FA.new AnimalPoint(animalID, xCoordinate, yCoordinate, d));
                 }
                 else if(animalID.contentEquals("FB")) {
                     xCoordinate = (xCoordinate - 21.800000)*(1000.00/0.34);
                     yCoordinate = (yCoordinate - 26.909000)*(1000.00/0.074);
-                    FB.addPoint(FB.new AnimalPoint(xCoordinate, yCoordinate, d));
+                    FB.addPoint(FB.new AnimalPoint(animalID, xCoordinate, yCoordinate, d));
                 }
 
             }
 
             s.close();
         } catch (IOException e) {}
-
-        animalList.add(FA);
-        animalList.add(FB);
+        this.animalList = new ArrayList<>();
+        this.animalList.add(FA);
+        this.animalList.add(FB);
     }
+
 }

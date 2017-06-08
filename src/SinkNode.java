@@ -1,6 +1,7 @@
 /**
  * Created by jun on 6/6/17.
  */
+import java.util.ArrayList;
 import java.util.List;
 
 public class SinkNode {
@@ -12,6 +13,7 @@ public class SinkNode {
     private int numberEvents;
     private Queue<Grid> path;
     private double speed;
+//    private int flyTime;
 
     SinkNode() {
         this.X = 0.0;
@@ -21,8 +23,7 @@ public class SinkNode {
         this.numberZebras = 0;
         this.numberEvents = 0;
         this.path = new Queue<Grid>();
-//        this.date = new Date(113, 01, 01, 00, 00, 00);
-        this.speed = 15.0;
+        this.speed = 10.0;
     }
 
     public double getX() {
@@ -52,13 +53,13 @@ public class SinkNode {
 
     public void updateQvalues_onPath (double INIT_REWARDS, double alpha, double discount)
     {
-        List<Grid> pathList = (List) path;
+        List<Grid> pathList = path.toList();
         int index = pathList.size() - 1;
         while(index > 0) {
             Grid curr = pathList.get(index);
             Grid prev = pathList.get(index-1);
             int neigh_index = prev.getNeighbors().indexOf(curr);
-            double maxQvalue = getMaxQvalue(curr.getQvalues());
+            double maxQvalue = getMaxQvalue(curr);
             double newQvalue = 0.0;
             double oldQvalue = prev.getQvalues()[neigh_index];
             newQvalue = oldQvalue + alpha * (INIT_REWARDS + discount * maxQvalue - oldQvalue);
@@ -70,17 +71,19 @@ public class SinkNode {
 
 
     public double getVOI() {
-        return VOI;
+        return this.VOI;
     }
 
     public Queue<Grid> getPath() {
         return path;
     }
 
-    public double getMaxQvalue(double[] Q) {
+    public double getMaxQvalue(Grid curr) {
+        double Q[] = curr.getQvalues();
+        int numDirections = curr.getNeighbors().size();
         int maxIndex = 0;
         double maxNumber = Q[maxIndex];
-        for(int i = 0; i < Q.length; i++) {
+        for(int i = 0; i < numDirections; i++) {
             if(maxNumber < Q[i]) {
                 maxIndex = i;
                 maxNumber = Q[i];
@@ -98,8 +101,9 @@ public class SinkNode {
         Grid current = this.getCurrentGrid();
         int index = 0;
         double[] Q = current.getQvalues();
+        int numDirections = current.getNeighbors().size();
         double number = Q[0];
-        for(int i = 0; i < Q.length; i++) {
+        for(int i = 0; i < numDirections; i++) {
             if(number < Q[i]) {
                 number = Q[i];
                 index = i;
@@ -107,7 +111,7 @@ public class SinkNode {
         }
         // do random selection if Q values in all actions are 0.0
         if(index == 0 && Q[0] == 0.0) {
-            index = (int)(Math.random() * (Q.length - 0));
+            index = (int)(Math.random() * (numDirections - 0));
         }
         return current.getNeighbors().get(index);
     }
@@ -117,28 +121,28 @@ public class SinkNode {
 
         Grid current = this.getCurrentGrid();
         double[] Q = current.getQvalues();
-        int[] ranges = new int[Q.length];
+        int numDirections = current.getNeighbors().size();
+        int[] ranges = new int[numDirections];
         int sum = 0;
 
-        for (int i = 0; i < Q.length; i++) {
+        for (int i = 0; i < numDirections; i++) {
             ranges[i] = (int)(Q[i] * 100);
             sum += ranges[i];
         }
 
         int index = 0;
-        int ran = 0;
-        if(sum == 0) {
-            ran = 0;
-        }
+        int ran;
+        if(sum == 0) { ran = 0; }
         else ran = (int)(Math.random() * ((sum - 0) + 1));
 
-        if(ran == 0) {
-            return current.getNeighbors().get(index);
+        if(ran == 0) { index = (int)(Math.random() * numDirections); }
+        else {
+            while(ran > 0) {
+                ran -= ranges[index];
+                index++;
+            }
+            index--;
         }
-        while(ran > 0) {
-            ran -= ranges[index];
-            index++;
-        }
-        return current.getNeighbors().get(index-1);
+        return current.getNeighbors().get(index);
     }
 }
