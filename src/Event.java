@@ -8,17 +8,19 @@ import java.util.ArrayList;
 public class Event {
 
     public static final double INITIAL_REWARD = 5.0;
-    public static final double IS_EVENT_TIME_INTERVAL = 30;
-    public static final double EVENT_COLLECT_TIME_INTERVAL = 150;
+    public static final double IS_EVENT_AGAIN_TIME = 72;
+    public static final double EVENT_VALID_TIME = 144;
 
     private double init_rewards;
     private int start_round;
+    private int collect_round;
     private AnimalTrace animal_trace;
 
     public Event(AnimalTrace animal_trace, int start_round, double INITIAL_REWARD) {
         this.start_round = start_round;
         this.init_rewards = INITIAL_REWARD;
         this.animal_trace = animal_trace;
+        this.collect_round = start_round + (int)EVENT_VALID_TIME;
     }
 
     public double getInitReward() {
@@ -38,5 +40,11 @@ public class Event {
     }
     public double getY() {
         return this.getAnimalTrace().getY();
+    }
+    public int getCollectRound() {
+        return collect_round;
+    }
+    public void setCollectRound(int collect_round) {
+        this.collect_round = collect_round;
     }
 }

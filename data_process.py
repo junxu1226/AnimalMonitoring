@@ -14,7 +14,8 @@ pylab.rcParams.update(params)
 df = pd.read_csv('Leopard11.txt', sep=" ", header=None)
 df.columns=['station', 'node', 'ind', 'year', 'month', 'date', 'hour', 'minute', 'X', 'Y', 'ID']
 
-dfa = df[df['ID'] == 'FA']
+# df['month'] = 1
+# dfa = df[df['ID'] == 'FA']
 
 id = np.array(df['ID'])
 name, num = np.unique(id, return_counts=True)
@@ -34,6 +35,9 @@ name, num = np.unique(id, return_counts=True)
 # Out[39]: 21.834186399999997
 
 df=df[(df['X'] > 21.80) & (df['X'] < 21.87) & (df['Y'] > 26.95) & (df['Y'] < 27.00)]
+
+df=df.sort(columns=['month', 'date', 'hour'])
+df.to_csv('pandas.txt', header=None, index=None, sep=" ", mode='a')
 x = np.array(df['X'])  #x range  (21.74 - 21.92) 0.18
 y = np.array(df['Y'])  # y range (26.90 - 27.04) 0.14
 
@@ -43,4 +47,8 @@ plt.plot(x,y, 'black')
 # plt.xlim((21.74, 21.92))
 # plt.ylim((26.90))
 # fig.savefig("figures/real_animal_movement.eps",format='eps', dpi=600)
+
+
+
+
 plt.show()

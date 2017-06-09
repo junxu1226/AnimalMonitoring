@@ -28,6 +28,7 @@ public class AnimalMonitoring extends JFrame {
 
     List<Animal> animalList;
     List<Event> eventPlotList;
+    List<Event> allEventsRecorder;
 
 
     public AnimalMonitoring(List<Animal> animalList) {
@@ -40,6 +41,7 @@ public class AnimalMonitoring extends JFrame {
 
         this.animalList = animalList;
         this.eventPlotList = new ArrayList<>();
+        this.allEventsRecorder = new ArrayList<>();
 
 
         NetworkPanel NMPanel = new NetworkPanel(SINK, eventPlotList);
@@ -65,7 +67,7 @@ public class AnimalMonitoring extends JFrame {
 
     class Task extends TimerTask {
         AnimalMonitoring animalMonitor;
-        Date theBeginTime = new Date(113, 00, 01, 00, 00, 00);
+        Date theBeginTime = new Date(113, 00, 22, 00, 00, 00);
         long startTime = theBeginTime.getTime();
         long newTimeInMilliSeconds = startTime;
         double samplingTimeOfSimulation = 600; // in seconds
@@ -84,13 +86,19 @@ public class AnimalMonitoring extends JFrame {
                     * 1000 * GLOBAL_TIME_ROUNDs;
             Date newDate = new Date(newTimeInMilliSeconds);
 
-            System.out.print("CurrentTime is " + newDate + '\n');
+//            System.out.print("CurrentTime is " + newDate + '\n');
 
             //******************************* sensing animals ************************//
             int i = 0;
             while(i < animalList.size()) {
 
-                AnimalTrace trace = animalList.get(i).getTrace();
+                AnimalTrace trace = animalList.get(i).getLastTrace();
+//                System.out.print("Trace date is " + trace.getDate() + '\n');
+
+                while( newDate.after(trace.getDate()) && (! animalList.get(i).getTrajectory().isEmpty()) ) {
+                    animalList.get(i).removeLastTrace(trace);
+                    trace = animalList.get(i).getLastTrace();
+                }
 
                 if(newDate.equals(trace.getDate())) {
                     Grid grid = findWhichGrid(trace.getX(), trace.getY(), GRID_LIST);
@@ -99,11 +107,12 @@ public class AnimalMonitoring extends JFrame {
 
                     if(grid.isEvent(event)) {
                         grid.addEvent(event);
-                        animalList.get(i).removeTrace();
                         SINK.addNumEventsSensed();
+                        allEventsRecorder.add(event);
                     }
-
+                    animalList.get(i).removeLastTrace(trace);
                 }
+
                 i++;
             }
 
@@ -121,34 +130,69 @@ public class AnimalMonitoring extends JFrame {
             else { // UAV gets the collection point, update everything, VOI, next Grid
                 // NEXT_SINK_GRID is current Grid
                 index_grid++;
+                System.out.print("CurrentTime is " + newDate + " in rounds: " + GLOBAL_TIME_ROUNDs + '\n');
 
                 int current_round = GLOBAL_TIME_ROUNDs;
                 double[] events_info = NEXT_SINK_GRID.collectEvents(current_round);
-                System.out.println(events_info[0] + " " + events_info[1] + " " + events_info[2] +
-                        " " + events_info[3] + " " + events_info[4] + '\n');
+                System.out.println("Events info: " + events_info[0] + " " + events_info[1] + " " + events_info[2] +
+                        " " + events_info[3] + " " + events_info[4]);
 
                 // events_info shape: double[] = [init_rewards, real_rewards,
-                // num_total_events, num_collected_events, timeDelay]
+                // num_events_sensed, num_events_collected, timeDelay]
                 NEXT_SINK_GRID.clearEvents();  // clear events in this Grid
 
                 SINK.update(NEXT_SINK_GRID.getX(), NEXT_SINK_GRID.getY(),
                         events_info[1], NEXT_SINK_GRID, (int)events_info[3], events_info[4]);
 
                 SINK.updateQvalues_onPath(events_info[0], 0.5, 0.8);
+                System.out.println("Q VALUES: " + Arrays.toString(NEXT_SINK_GRID.getQvalues()));
 
                 if(index_grid < GRID_LIST.size() && Mode.equals("MDP")) {
                     NEXT_SINK_GRID = GRID_LIST.get(index_grid);
                 }
                 else NEXT_SINK_GRID = SINK.nextGrid_probability();
+
+
+                System.out.println("NEXT_SINK_GRID: " + NEXT_SINK_GRID.getGridName() + '\n');
+
             }
 
 
             eventPlotList.clear();
             for(int j = 0; j < GRID_LIST.size(); j++) {
+                if(! GRID_LIST.get(j).getEventList().isEmpty()) {
+                    eventPlotList.addAll(GRID_LIST.get(j).getEventList());
+                }
 
-                eventPlotList.addAll(GRID_LIST.get(j).getEventList());
             }
+
             repaint();
+
+            File f1 = new File("./VOI_MDP.txt");
+            try {
+                FileOutputStream writeOut = new FileOutputStream(f1,true);
+                PrintWriter out = new PrintWriter(writeOut);
+                out.print(SINK.getVOI() + " " + SINK.getNumEventsSensed() + " " + SINK.getNumEventsCollected() + "\n");
+                out.close();
+            } catch (IOException e) { e.printStackTrace(); }
+
+
+            if(allEventsRecorder.size() == 200) {
+
+                File f2 = new File("./time_delay_MDP.txt");
+                try {
+                    FileOutputStream writeOut = new FileOutputStream(f2,true);
+                    PrintWriter out = new PrintWriter(writeOut);
+
+                    for(int k = 0; k < allEventsRecorder.size(); k++) {
+
+                        int delay = allEventsRecorder.get(k).getCollectRound() - allEventsRecorder.get(k).getStartRound();
+                        out.print(delay + "\n");
+                    }
+
+                    out.close();
+                } catch (IOException e) { e.printStackTrace(); }
+            }
         }
     }
 

@@ -23,11 +23,11 @@ public class File_Reader {
     Animal MA = new Animal("MA");
     Animal MB = new Animal("MB");
 
-    Date theBeginTime = new Date(113, 00, 01, 00, 00, 00);
-    Date theEndTime = new Date(113, 06, 01, 00, 00, 00);
+    Date theBeginTime = new Date(113, 00, 22, 00, 00, 00);
+    Date theEndTime = new Date(113, 03, 05, 00, 00, 00);
 
     public File_Reader() {
-        File f = new File("Leopard11.txt");
+        File f = new File("pandas.txt");
         this.animalList = new ArrayList<>();
         this.animalList.add(FA);
         this.animalList.add(FB);
@@ -42,9 +42,10 @@ public class File_Reader {
 
         try {
             Scanner s = new Scanner(f);
-//            System.out.println("just for test");
+//            System.out.println(s.);
             int num_traces = 0;
-            while(s.hasNextLine()){
+            while(s.hasNext()){
+
                 s.next();s.next();s.next();
 
                 int year = s.nextInt(); int month = s.nextInt(); int day = s.nextInt();
@@ -52,10 +53,10 @@ public class File_Reader {
                 double xCoordinate = s.nextDouble();
                 double yCoordinate = s.nextDouble();
                 String animalID= s.next();
-                month = 1;
+//                month = 1;
                 Date d = new Date(year-1900, month-1, day, hours, minutes);
 
-//                if(d.before(theBeginTime)||d.after(theEndTime)) { continue; }
+                if(d.before(theBeginTime)||d.after(theEndTime)) { continue; }
 
                 if(xCoordinate > 21.80 && xCoordinate < 21.87 && yCoordinate > 26.95 && yCoordinate < 27.00) {
 
@@ -66,8 +67,9 @@ public class File_Reader {
                     AnimalTrace trace = new AnimalTrace (animalID, xCoordinate, yCoordinate, d);
                     int i = 0;
                     while(i < animalList.size()) {
-                        if(animalID.contentEquals(animalList.get(i).getAnimalID())){
+                        if(animalID.equals(animalList.get(i).getAnimalID())){
                             animalList.get(i).addTrace(trace);
+//                            System.out.print(trace.getAnimalID() + " " + trace.getX() + " " + trace.getY() + " " + trace.getDate() + '\n');
                             break;
                         }
                         i++;
@@ -76,7 +78,12 @@ public class File_Reader {
                 }
             }
 
-            System.out.print("Total num of traces: " + num_traces + '\n');
+//            System.out.print("Total num of traces: " + num_traces + '\n');
+            System.out.print("FA is: " + animalList.get(0).getTrajectory().size() + '\n');
+            System.out.print("FB is: " + animalList.get(1).getTrajectory().size() + '\n');
+            System.out.print("FC is: " + animalList.get(2).getTrajectory().size() + '\n');
+            System.out.print("FD is: " + animalList.get(3).getTrajectory().size() + '\n');
+            System.out.print("The size is: " + animalList.size() + '\n');
             s.close();
         } catch (IOException e) {}
     }

@@ -19,9 +19,9 @@ public class Animal{
         this.trajectory.add(trace);
     }
     public List<AnimalTrace> getTrajectory() { return this.trajectory; }
-    public AnimalTrace getTrace() { return this.trajectory.get(0); }
-    public void removeTrace() {
-        this.trajectory.remove(0);
+    public AnimalTrace getLastTrace() { return this.trajectory.get(0); }
+    public void removeLastTrace(AnimalTrace trace) {
+        this.trajectory.remove(trace);
     }
 
 }

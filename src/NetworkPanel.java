@@ -12,6 +12,7 @@ class NetworkPanel extends JPanel {
     SinkNode SINK;
     List<Event> eventPlotList;
     int GLOBAL_TIME_ROUNDs;
+    int counter = 0;
 
     NetworkPanel(SinkNode sink, List<Event> eventPlotList) {
         this.SINK = sink;
@@ -39,13 +40,13 @@ class NetworkPanel extends JPanel {
         GLOBAL_TIME_ROUNDs = SINK.flyTime;
         for(int i = 0; i < eventPlotList.size(); i++) {
 
-            if( (GLOBAL_TIME_ROUNDs - eventPlotList.get(i).getStartRound()) > Event.EVENT_COLLECT_TIME_INTERVAL) {
+            if( (GLOBAL_TIME_ROUNDs - eventPlotList.get(i).getStartRound()) > Event.EVENT_VALID_TIME) {
 
                 continue;
             }
 
             g2.drawImage(icon.getImage(), (int)eventPlotList.get(i).getX(), (int)eventPlotList.get(i).getY(),
-                    60, 60, this);
+                    40, 40, this);
             g2.drawString(eventPlotList.get(i).getAnimalID(), (int)eventPlotList.get(i).getX() + 10,
                     (int)eventPlotList.get(i).getY() + 20);
         }
@@ -59,17 +60,6 @@ class NetworkPanel extends JPanel {
         g2.drawString("Total NumEventsSensed: " + SINK.getNumEventsSensed(), 1020, 200);
         g2.drawString("Total NumEventsCollected: " + SINK.getNumEventsCollected(), 1020, 250);
         g2.drawString("Average TimeDelay: " + SINK.getTimeDelay()/(float)SINK.getNumEventsCollected(), 1020, 300);
-
-
-        File writefile = new File("./result.txt");
-        try {
-            FileOutputStream writeOut = new FileOutputStream(writefile,true);
-            PrintWriter out = new PrintWriter(writeOut);
-            out.print(SINK.getVOI() + "\r\n");
-//            out.print(sinknode.getVOI() + " " + AverageDelay_MDP + "\r\n");
-            out.close();
-        } catch (IOException e) { e.printStackTrace(); }
-
 
     }
 }

@@ -3,9 +3,6 @@ import java.util.List;
 import java.util.Date;
 
 public class Grid {
-    private static final int NUM_DIRECTIONS = 9;
-    private static final double DROP_EVENT_REWARD_LESS_THAN = 0.0;
-
 
     private String name;
     private double headX;
@@ -14,6 +11,7 @@ public class Grid {
     private List<Grid> neighbors;
 //    private Date currentTime;
     private List<Event> eventList;
+    private Queue<Event> appearQueue;  // animal is sensed, but may not be treated as event, like continious appearing
 
     Grid(String name, double x, double y) {
         this.name = name;
@@ -21,6 +19,7 @@ public class Grid {
         this.headY = y;
         this.neighbors = new ArrayList<>();
         this.eventList = new ArrayList<Event>();
+        this.appearQueue = new Queue<Event>(11);
     }
 
     public String getGridName() {
@@ -46,19 +45,30 @@ public class Grid {
     }
     public void setNeighbors(List<Grid> neighbors) { this.neighbors = neighbors; }
 
-    public void addEvent(Event event) { eventList.add(event); }
+    public void addEvent(Event event) { this.eventList.add(event); }
 
     public boolean isEvent(Event event) {
 
         int i = 0;
         while(i < eventList.size()) {
             Event e = eventList.get(i);
-            if(event.getAnimalID().equals(e.getAnimalID()) && (event.getStartRound() - e.getStartRound()) <= Event.IS_EVENT_TIME_INTERVAL) {
+            if(event.getAnimalID().equals(e.getAnimalID()) && (event.getStartRound() - e.getStartRound()) <= Event.IS_EVENT_AGAIN_TIME) {
                 return false;
             }
             i++;
         }
-        return true;
+
+        List<Event> appearList = appearQueue.toList();
+        i = appearList.size() - 1;
+        while(i > 0) {
+            Event e = appearList.get(i);
+            if( (event.getAnimalID().equals(e.getAnimalID())) && (event.getStartRound() - e.getStartRound()) < 10 ) {
+                return true;
+            }
+            i--;
+        }
+        appearQueue.enqueue(event);
+        return false;
     }
 
     public double[] collectEvents(int current_round) {  // VOI =  Init * e^{-B * t}
@@ -71,19 +81,21 @@ public class Grid {
         double B_parameter = 1.0 / 60.0;
 
 
-        int i = 0;
-        while(i < eventList.size()) {
+        int i = eventList.size();
+        while(i > 0) {
+            i--;
             init_rewards += eventList.get(i).getInitReward();
+            int eachTimeDelay = current_round - eventList.get(i).getStartRound();
+            if( eachTimeDelay > Event.EVENT_VALID_TIME ) { continue; }
+
+            eventList.get(i).setCollectRound(current_round);
+
             double eachReward = eventList.get(i).getInitReward() *
                     Math.pow(Math.E, -(current_round - eventList.get(i).getStartRound()) * B_parameter);
 
-            if(eachReward < DROP_EVENT_REWARD_LESS_THAN) { continue; }
-            double eachTimeDelay = current_round - eventList.get(i).getStartRound();
             rewards += eachReward;
             num_events_collected++;
             timeDelay += eachTimeDelay;
-
-            i++;
         }
         events[0] = init_rewards;
         events[1] = rewards;
@@ -94,6 +106,8 @@ public class Grid {
         return events;
     }
 
-    public void clearEvents() { eventList.clear(); }
+    public void clearEvents() {
+        eventList.clear();
+    }
     public List<Event> getEventList() { return this.eventList; }
 }

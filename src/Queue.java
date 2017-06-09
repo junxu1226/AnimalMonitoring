@@ -18,11 +18,11 @@ public class Queue<Item> implements Iterable<Item> {
     /**
      * Initializes an empty queue.
      */
-    public Queue() {
+    public Queue(int queueSize) {
         this.first = null;
         this.last  = null;
         this.numElements = 0;
-        this.queueSize = 5;
+        this.queueSize = queueSize;
     }
 
     public boolean isEmpty() {

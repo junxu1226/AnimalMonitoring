@@ -5,7 +5,7 @@ public class InitialGrids {
 
     private Grid [][] map;
     private List<Grid> gridList;
-    private static final double GRID_LENGTH = 250;
+    private static final double GRID_LENGTH = 250.0;
 
 
     InitialGrids(int num_grids_each_line) {

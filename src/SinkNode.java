@@ -22,7 +22,7 @@ public class SinkNode {
         this.timeDelay = 0.0;
         this.numberEventsCollected = 0;
         this.numEventsSensed = 0;
-        this.path = new Queue<Grid>();
+        this.path = new Queue<Grid>(5);
         this.speed = 50.0;
     }
 
@@ -134,17 +134,14 @@ public class SinkNode {
 
         int index = 0;
         int ran;
-        if(sum == 0) { ran = 0; }
-        else ran = (int)(Math.random() * ((sum - 0) + 1));
+        ran = (int)(Math.random() * sum);
 
-        if(ran == 0) { index = (int)(Math.random() * numDirections); }
-        else {
-            while(ran > 0) {
-                ran -= ranges[index];
-                index++;
-            }
-            index--;
+        while(ran >= 0) {
+            ran -= ranges[index];
+            index++;
         }
+        index--;
+
         return current.getNeighbors().get(index);
     }
 }
