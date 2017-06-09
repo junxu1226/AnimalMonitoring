@@ -7,7 +7,7 @@ public class Grid {
     private String name;
     private double headX;
     private double headY;
-    private double[] Qvalues = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // size: NUM_DIRECTIONS
+    private double[] Qvalues = {10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0}; // size: NUM_DIRECTIONS
     private List<Grid> neighbors;
 //    private Date currentTime;
     private List<Event> eventList;
@@ -75,8 +75,8 @@ public class Grid {
         double[] events = new double[5];
 
         int num_events_collected = 0;
-        double rewards = 0.0;
-        double init_rewards = 0.0;
+        double rewards = 0;
+        double init_rewards = -0.2;
         double timeDelay = 0.0;
         double B_parameter = 1.0 / 60.0;
 

@@ -36,8 +36,8 @@ name, num = np.unique(id, return_counts=True)
 
 df=df[(df['X'] > 21.80) & (df['X'] < 21.87) & (df['Y'] > 26.95) & (df['Y'] < 27.00)]
 
-df=df.sort(columns=['month', 'date', 'hour'])
-df.to_csv('pandas.txt', header=None, index=None, sep=" ", mode='a')
+# df=df.sort(columns=['month', 'date', 'hour'])
+# df.to_csv('pandas.txt', header=None, index=None, sep=" ", mode='a')
 x = np.array(df['X'])  #x range  (21.74 - 21.92) 0.18
 y = np.array(df['Y'])  # y range (26.90 - 27.04) 0.14
 

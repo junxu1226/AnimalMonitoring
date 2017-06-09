@@ -16,13 +16,15 @@ public class AnimalMonitoring extends JFrame {
 
 
     int GLOBAL_TIME_ROUNDs;  // silumation time in rounds
+    Timer t = new Timer();
 
 
     List<Grid> GRID_LIST;
+    List<Grid> ROUND_GRID_LIST;
     Grid NEXT_SINK_GRID; // set the first Grid "A1" as the next grid when simulation starts
 
 
-    String Mode = "MDP";
+    String Mode = "Greedy";
     SinkNode SINK = new SinkNode();
 
 
@@ -36,7 +38,8 @@ public class AnimalMonitoring extends JFrame {
         int num_grids_each_line = 4;
         InitialGrids grids = new InitialGrids(num_grids_each_line);
         this.GRID_LIST = grids.getGridList();
-        this.NEXT_SINK_GRID = GRID_LIST.get(0);
+        this.ROUND_GRID_LIST = grids.getRoundGridList();
+        this.NEXT_SINK_GRID = ROUND_GRID_LIST.get(0);
 
 
         this.animalList = animalList;
@@ -51,7 +54,7 @@ public class AnimalMonitoring extends JFrame {
         this.setTitle("Max Value of Information on Animal Monitoring");
 
 
-        Timer t = new Timer();
+
         Task task = new Task(this);
         t.schedule(task, 0, 100);
     }
@@ -93,7 +96,6 @@ public class AnimalMonitoring extends JFrame {
             while(i < animalList.size()) {
 
                 AnimalTrace trace = animalList.get(i).getLastTrace();
-//                System.out.print("Trace date is " + trace.getDate() + '\n');
 
                 while( newDate.after(trace.getDate()) && (! animalList.get(i).getTrajectory().isEmpty()) ) {
                     animalList.get(i).removeLastTrace(trace);
@@ -127,8 +129,9 @@ public class AnimalMonitoring extends JFrame {
                 SINK.setX(SINK.getX() + SINK.getSpeed()*Direc_X);
                 SINK.setY(SINK.getY() + SINK.getSpeed()* Direc_Y);
             }
-            else { // UAV gets the collection point, update everything, VOI, next Grid
-                // NEXT_SINK_GRID is current Grid
+            else {
+                //********************  Information collection and Q update ************//
+
                 index_grid++;
                 System.out.print("CurrentTime is " + newDate + " in rounds: " + GLOBAL_TIME_ROUNDs + '\n');
 
@@ -137,24 +140,51 @@ public class AnimalMonitoring extends JFrame {
                 System.out.println("Events info: " + events_info[0] + " " + events_info[1] + " " + events_info[2] +
                         " " + events_info[3] + " " + events_info[4]);
 
-                // events_info shape: double[] = [init_rewards, real_rewards,
-                // num_events_sensed, num_events_collected, timeDelay]
+                // **** events_info[] = [init_rewards, real_rewards, num_events_sensed, num_events_collected, timeDelay]
+
                 NEXT_SINK_GRID.clearEvents();  // clear events in this Grid
 
                 SINK.update(NEXT_SINK_GRID.getX(), NEXT_SINK_GRID.getY(),
                         events_info[1], NEXT_SINK_GRID, (int)events_info[3], events_info[4]);
 
-                SINK.updateQvalues_onPath(events_info[0], 0.5, 0.8);
+//                SINK.updateQvaluesMDPonPath(events_info[0], 0.5, 0.8);
+                SINK.updateQvaluesGreedy(events_info[1], 0.5, 0.8);
                 System.out.println("Q VALUES: " + Arrays.toString(NEXT_SINK_GRID.getQvalues()));
 
-                if(index_grid < GRID_LIST.size() && Mode.equals("MDP")) {
-                    NEXT_SINK_GRID = GRID_LIST.get(index_grid);
+                // ******************* NEXT_SINK_GRID path planning ***********************//
+
+                if(Mode.equals("MDP")) {
+                    if( index_grid < ROUND_GRID_LIST.size() ) {
+                        NEXT_SINK_GRID = ROUND_GRID_LIST.get(index_grid);
+                    }
+                    else NEXT_SINK_GRID = SINK.nextGrid_probability();
                 }
-                else NEXT_SINK_GRID = SINK.nextGrid_probability();
+                if(Mode.equals("MDP-epsilon")) {
+                    if( index_grid < ROUND_GRID_LIST.size() ) {
+                        NEXT_SINK_GRID = ROUND_GRID_LIST.get(index_grid);
+                    }
+                    else NEXT_SINK_GRID = SINK.nextGrid_maxQvalueMDP();
+                }
+
+                else if(Mode.equals("TSP")) {
+                    NEXT_SINK_GRID = ROUND_GRID_LIST.get(index_grid);
+                    if(index_grid == ROUND_GRID_LIST.size() - 1) { index_grid=-1; }
+
+                }
+                else if(Mode.equals("Greedy")) {
+
+                    if( index_grid < ROUND_GRID_LIST.size() ) {
+                        NEXT_SINK_GRID = ROUND_GRID_LIST.get(index_grid);
+                    }
+                    else NEXT_SINK_GRID = SINK.nextGrid_maxQvalueGreedy();
+                }
+                else if(Mode.equals("Random")) {
+
+                    NEXT_SINK_GRID = SINK.nextGrid_Random();
+                }
 
 
                 System.out.println("NEXT_SINK_GRID: " + NEXT_SINK_GRID.getGridName() + '\n');
-
             }
 
 
@@ -168,7 +198,7 @@ public class AnimalMonitoring extends JFrame {
 
             repaint();
 
-            File f1 = new File("./VOI_MDP.txt");
+            File f1 = new File(Mode + "_VOI_1.txt");
             try {
                 FileOutputStream writeOut = new FileOutputStream(f1,true);
                 PrintWriter out = new PrintWriter(writeOut);
@@ -177,9 +207,9 @@ public class AnimalMonitoring extends JFrame {
             } catch (IOException e) { e.printStackTrace(); }
 
 
-            if(allEventsRecorder.size() == 200) {
+            if(SINK.getNumEventsSensed() >= 200) {
 
-                File f2 = new File("./time_delay_MDP.txt");
+                File f2 = new File(Mode + "_time_delay_1.txt");
                 try {
                     FileOutputStream writeOut = new FileOutputStream(f2,true);
                     PrintWriter out = new PrintWriter(writeOut);
@@ -192,6 +222,9 @@ public class AnimalMonitoring extends JFrame {
 
                     out.close();
                 } catch (IOException e) { e.printStackTrace(); }
+
+                t.cancel();
+                t.purge();
             }
         }
     }

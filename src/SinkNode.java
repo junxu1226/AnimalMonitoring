@@ -53,7 +53,7 @@ public class SinkNode {
 
     }
 
-    public void updateQvalues_onPath (double INIT_REWARDS, double alpha, double discount)
+    public void updateQvaluesMDPonPath (double INIT_REWARDS, double alpha, double discount)
     {
         List<Grid> pathList = path.toList();
         int index = pathList.size() - 1;
@@ -62,13 +62,34 @@ public class SinkNode {
             Grid prev = pathList.get(index-1);
             int neigh_index = prev.getNeighbors().indexOf(curr);
             double maxQvalue = getMaxQvalue(curr);
-            double newQvalue = 0.0;
             double oldQvalue = prev.getQvalues()[neigh_index];
-            newQvalue = oldQvalue + alpha * (INIT_REWARDS + discount * maxQvalue - oldQvalue);
+
+            double dis = Math.pow(0.6, pathList.size() - 1 - index);
+
+            double newQvalue = oldQvalue + dis * alpha * (INIT_REWARDS + discount * maxQvalue - oldQvalue);
             prev.setQvalues(neigh_index, newQvalue);
 
             index--;
         }
+    }
+
+    public void updateQvaluesGreedy (double REWARDS, double alpha, double discount)
+    {
+        List<Grid> pathList = path.toList();
+        int index = pathList.size() - 1;
+
+        if(index == 0) { return; }
+
+        Grid curr = pathList.get(index);
+        Grid prev = pathList.get(index-1);
+        int neigh_index = prev.getNeighbors().indexOf(curr);
+
+        double maxQvalue = getMaxQvalue(curr);
+        double oldQvalue = prev.getQvalues()[neigh_index];
+
+        double newQvalue = oldQvalue + alpha * (REWARDS + discount * maxQvalue - oldQvalue);
+        prev.setQvalues(neigh_index, newQvalue);
+
     }
 
 
@@ -99,7 +120,43 @@ public class SinkNode {
         return path.peek_tail();
     }
 
-    public Grid nextGrid_maxQvalue() {
+    public Grid nextGrid_maxQvalueGreedy() {
+        Grid current = this.getCurrentGrid();
+        int index = 0;
+        double[] Q = current.getQvalues();
+        int numDirections = current.getNeighbors().size();
+        double number = Q[0];
+        int numSameValues = 1;
+        for(int i = 0; i < numDirections; i++) {
+            if(number < Q[i]) {
+                number = Q[i];
+                index = i;
+                numSameValues = 1;
+            }
+            else if(number == Q[i]) { numSameValues++; }
+        }
+
+//        if(numSameValues > 1) {
+//
+//            int ran = (int)(Math.random() * numSameValues);
+//
+//            for(int i = 0; i < numDirections; i++) {
+//                if(Q[index] == Q[i]) {
+//
+//                    if(ran == 0) { return current.getNeighbors().get(i); }
+//                    ran--;
+//                }
+//            }
+//
+//        }
+        // do random selection if Q values in all actions are 0.0
+//        if(index == 0 && Q[0] == 0.0) {
+//
+//        }
+        return current.getNeighbors().get(index);
+    }
+
+    public Grid nextGrid_maxQvalueMDP() {
         Grid current = this.getCurrentGrid();
         int index = 0;
         double[] Q = current.getQvalues();
@@ -118,6 +175,16 @@ public class SinkNode {
         return current.getNeighbors().get(index);
     }
 
+    public Grid nextGrid_Random() {
+        Grid current = this.getCurrentGrid();
+        int index = 0;
+
+        int numDirections = current.getNeighbors().size();
+
+        index = (int)(Math.random() * numDirections);
+
+        return current.getNeighbors().get(index);
+    }
 
     public Grid nextGrid_probability() {
 
@@ -128,7 +195,7 @@ public class SinkNode {
         int sum = 0;
 
         for (int i = 0; i < numDirections; i++) {
-            ranges[i] = (int)(Math.max(Q[i],1.0) * 10);
+            ranges[i] = (int)(Math.max(Q[i],0.5) * 10);
             sum += ranges[i];
         }
 
