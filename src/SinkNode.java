@@ -9,45 +9,47 @@ public class SinkNode {
     private double Y; // current y coordinates
     private double VOI;
     private double timeDelay;
-    private int numberZebras;
-    private int numberEvents;
+    private int numberEventsCollected;
+    private int numEventsSensed;
     private Queue<Grid> path;
     private double speed;
-//    private int flyTime;
+    public int flyTime = 0;
 
     SinkNode() {
         this.X = 0.0;
         this.Y = 0.0;
         this.VOI = 0.0;
         this.timeDelay = 0.0;
-        this.numberZebras = 0;
-        this.numberEvents = 0;
+        this.numberEventsCollected = 0;
+        this.numEventsSensed = 0;
         this.path = new Queue<Grid>();
-        this.speed = 10.0;
+        this.speed = 50.0;
     }
 
-    public double getX() {
-        return X;
-    }
-    public double getY() {
-        return Y;
-    }
-    public void setX(double X) {
-        this.X = X;
-    }
-    public void setY(double Y) {
-        this.Y = Y;
-    }
+    public double getX() { return X; }
+    public double getY() { return Y; }
+    public void setX(double X) { this.X = X; }
+    public void setY(double Y) { this.Y = Y; }
 
-    public double getSpeed() {
-        return speed;
-    }
-    public void update (double X, double Y, double VOI, Grid grid)
+    public double getSpeed() { return speed; }
+
+    public double getTimeDelay() { return timeDelay; }
+
+    public int getNumEventsSensed() { return numEventsSensed; }
+    public void addNumEventsSensed() {this.numEventsSensed += 1;}
+
+    public int getNumEventsCollected() { return numberEventsCollected; }
+//    public void setNumEventsCollected(int newValue) {this.numberEventsCollected = newValue;}
+
+
+    public void update (double X, double Y, double VOI, Grid grid, int numEventsCollected, double timeDelay)
     {
         this.X = X;
         this.Y = Y;
         this.VOI += VOI;
+        this.timeDelay += timeDelay;
         this.path.enqueue(grid); // add this grid to path
+        this.numberEventsCollected += numEventsCollected;
 
     }
 
@@ -126,7 +128,7 @@ public class SinkNode {
         int sum = 0;
 
         for (int i = 0; i < numDirections; i++) {
-            ranges[i] = (int)(Q[i] * 100);
+            ranges[i] = (int)(Math.max(Q[i],1.0) * 10);
             sum += ranges[i];
         }
 

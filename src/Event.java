@@ -7,14 +7,18 @@ import java.util.ArrayList;
  */
 public class Event {
 
-//    private static final double INITIAL_REWARD = 10.0;
+    public static final double INITIAL_REWARD = 5.0;
+    public static final double IS_EVENT_TIME_INTERVAL = 30;
+    public static final double EVENT_COLLECT_TIME_INTERVAL = 150;
+
     private double init_rewards;
     private int start_round;
-    private String animalID;
-    public Event(String animalID, int start_round, double INITIAL_REWARD) {
+    private AnimalTrace animal_trace;
+
+    public Event(AnimalTrace animal_trace, int start_round, double INITIAL_REWARD) {
         this.start_round = start_round;
         this.init_rewards = INITIAL_REWARD;
-        this.animalID = animalID;
+        this.animal_trace = animal_trace;
     }
 
     public double getInitReward() {
@@ -23,7 +27,16 @@ public class Event {
     public int getStartRound() {
         return start_round;
     }
+    public AnimalTrace getAnimalTrace() {
+        return animal_trace;
+    }
     public String getAnimalID() {
-        return animalID;
+        return this.getAnimalTrace().getAnimalID();
+    }
+    public double getX() {
+        return this.getAnimalTrace().getX();
+    }
+    public double getY() {
+        return this.getAnimalTrace().getY();
     }
 }

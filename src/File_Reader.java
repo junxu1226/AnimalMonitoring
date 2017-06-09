@@ -14,15 +14,36 @@ public class File_Reader {
     List<Animal> animalList;
     Animal FA = new Animal("FA");
     Animal FB = new Animal("FB");
+    Animal FC = new Animal("FC");
+    Animal FD = new Animal("FD");
+    Animal FE = new Animal("FE");
+    Animal FF = new Animal("FF");
+    Animal FG = new Animal("FG");
+    Animal FH = new Animal("FH");
+    Animal MA = new Animal("MA");
+    Animal MB = new Animal("MB");
 
-    Date theBeginTime = new Date(113, 01, 01, 00, 00, 00);
-    Date theEndTime = new Date(113, 06, 5, 00, 00, 00);
+    Date theBeginTime = new Date(113, 00, 01, 00, 00, 00);
+    Date theEndTime = new Date(113, 06, 01, 00, 00, 00);
 
     public File_Reader() {
         File f = new File("Leopard11.txt");
+        this.animalList = new ArrayList<>();
+        this.animalList.add(FA);
+        this.animalList.add(FB);
+        this.animalList.add(FC);
+        this.animalList.add(FD);
+        this.animalList.add(FE);
+        this.animalList.add(FF);
+        this.animalList.add(FG);
+        this.animalList.add(FH);
+        this.animalList.add(MA);
+        this.animalList.add(MB);
+
         try {
             Scanner s = new Scanner(f);
 //            System.out.println("just for test");
+            int num_traces = 0;
             while(s.hasNextLine()){
                 s.next();s.next();s.next();
 
@@ -31,29 +52,32 @@ public class File_Reader {
                 double xCoordinate = s.nextDouble();
                 double yCoordinate = s.nextDouble();
                 String animalID= s.next();
+                month = 1;
                 Date d = new Date(year-1900, month-1, day, hours, minutes);
 
-                if (d.before(theBeginTime)||d.after(theEndTime)){ continue; }
-//                Animal.AnimalPoint point = new Animal.AnimalPoint(animalID, xCoordinate, yCoordinate, d);
-                if (animalID.contentEquals("FA")){
+//                if(d.before(theBeginTime)||d.after(theEndTime)) { continue; }
 
-                    xCoordinate = (xCoordinate - 21.820000) * (1000.00 / 0.09);
-                    yCoordinate = (yCoordinate - 26.927000) * (1000.00 / 0.06);
-                    FA.addPoint(FA.new AnimalPoint(animalID, xCoordinate, yCoordinate, d));
-                }
-                else if(animalID.contentEquals("FB")) {
-                    xCoordinate = (xCoordinate - 21.800000)*(1000.00/0.34);
-                    yCoordinate = (yCoordinate - 26.909000)*(1000.00/0.074);
-                    FB.addPoint(FB.new AnimalPoint(animalID, xCoordinate, yCoordinate, d));
-                }
+                if(xCoordinate > 21.80 && xCoordinate < 21.87 && yCoordinate > 26.95 && yCoordinate < 27.00) {
 
+                    xCoordinate = (xCoordinate - 21.80) * 1000.0 / 0.07;
+                    yCoordinate = (yCoordinate - 26.95) * 1000.0 / 0.05;
+
+//                    System.out.print("ReadinTime is " + d + " " + animalID + '\n');
+                    AnimalTrace trace = new AnimalTrace (animalID, xCoordinate, yCoordinate, d);
+                    int i = 0;
+                    while(i < animalList.size()) {
+                        if(animalID.contentEquals(animalList.get(i).getAnimalID())){
+                            animalList.get(i).addTrace(trace);
+                            break;
+                        }
+                        i++;
+                    }
+                    num_traces++;
+                }
             }
 
+            System.out.print("Total num of traces: " + num_traces + '\n');
             s.close();
         } catch (IOException e) {}
-        this.animalList = new ArrayList<>();
-        this.animalList.add(FA);
-        this.animalList.add(FB);
     }
-
 }

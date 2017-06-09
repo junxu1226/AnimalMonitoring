@@ -5,7 +5,7 @@ import java.util.Date;
 public class Grid {
     private static final int NUM_DIRECTIONS = 9;
     private static final double DROP_EVENT_REWARD_LESS_THAN = 0.0;
-    private static final double IS_EVENT_TIME_INTERVAL = 50;
+
 
     private String name;
     private double headX;
@@ -46,19 +46,14 @@ public class Grid {
     }
     public void setNeighbors(List<Grid> neighbors) { this.neighbors = neighbors; }
 
-    public void addEvent(String animalID, int current_round) {
+    public void addEvent(Event event) { eventList.add(event); }
 
-        if(isEvent(animalID, current_round)) {
-            eventList.add(new Event(animalID, current_round, 10.0));
-        }
-    }
-
-    private boolean isEvent(String animalID, int current_round) {
+    public boolean isEvent(Event event) {
 
         int i = 0;
         while(i < eventList.size()) {
             Event e = eventList.get(i);
-            if(animalID.equals(e.getAnimalID()) && (current_round - e.getStartRound()) <= IS_EVENT_TIME_INTERVAL) {
+            if(event.getAnimalID().equals(e.getAnimalID()) && (event.getStartRound() - e.getStartRound()) <= Event.IS_EVENT_TIME_INTERVAL) {
                 return false;
             }
             i++;
@@ -100,4 +95,5 @@ public class Grid {
     }
 
     public void clearEvents() { eventList.clear(); }
+    public List<Event> getEventList() { return this.eventList; }
 }

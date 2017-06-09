@@ -10,13 +10,13 @@ import java.util.List;
 class NetworkPanel extends JPanel {
 
     SinkNode SINK;
-    List<Animal.AnimalPoint> animalPlotList;
-    int global_rounds;
+    List<Event> eventPlotList;
+    int GLOBAL_TIME_ROUNDs;
 
-    NetworkPanel(SinkNode sink, List<Animal.AnimalPoint> animalPlotList, int global_rounds) {
+    NetworkPanel(SinkNode sink, List<Event> eventPlotList) {
         this.SINK = sink;
-        this.animalPlotList = animalPlotList;
-        this.global_rounds = global_rounds;
+        this.eventPlotList = eventPlotList;
+        this.GLOBAL_TIME_ROUNDs = SINK.flyTime;
     }
 
     public void paintComponent(Graphics g) {
@@ -36,19 +36,29 @@ class NetworkPanel extends JPanel {
         g2.setColor(Color.MAGENTA);
 
 
-        for(int i = 0; i < animalPlotList.size(); i++) {
-            g2.drawImage(icon.getImage(), (int)animalPlotList.get(i).X, (int)animalPlotList.get(i).Y,
-                    80, 80, this);
-            g2.drawString(animalPlotList.get(i).animalID, (int)animalPlotList.get(i).X + 10,
-                    (int)animalPlotList.get(i).Y + 20);
+        GLOBAL_TIME_ROUNDs = SINK.flyTime;
+        for(int i = 0; i < eventPlotList.size(); i++) {
+
+            if( (GLOBAL_TIME_ROUNDs - eventPlotList.get(i).getStartRound()) > Event.EVENT_COLLECT_TIME_INTERVAL) {
+
+                continue;
+            }
+
+            g2.drawImage(icon.getImage(), (int)eventPlotList.get(i).getX(), (int)eventPlotList.get(i).getY(),
+                    60, 60, this);
+            g2.drawString(eventPlotList.get(i).getAnimalID(), (int)eventPlotList.get(i).getX() + 10,
+                    (int)eventPlotList.get(i).getY() + 20);
         }
 
 
-        g2.drawImage(icon_UAV.getImage(), (int)SINK.getX(), (int)SINK.getY(), 80, 60, this);
+        g2.drawImage(icon_UAV.getImage(), (int)SINK.getX(), (int)SINK.getY(), 60, 40, this);
         g2.setFont(font);
-        g2.drawString("Time:"+ global_rounds, 1020, 50);
+        g2.drawString("Simulation Time:"+ GLOBAL_TIME_ROUNDs, 1020, 50);
         g2.drawString("Current Mode: MDP", 1020, 100);
         g2.drawString("Total VOI_MDP: " + SINK.getVOI(), 1020, 150);
+        g2.drawString("Total NumEventsSensed: " + SINK.getNumEventsSensed(), 1020, 200);
+        g2.drawString("Total NumEventsCollected: " + SINK.getNumEventsCollected(), 1020, 250);
+        g2.drawString("Average TimeDelay: " + SINK.getTimeDelay()/(float)SINK.getNumEventsCollected(), 1020, 300);
 
 
         File writefile = new File("./result.txt");

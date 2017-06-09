@@ -15,33 +15,34 @@ import java.util.Timer;
 public class AnimalMonitoring extends JFrame {
 
 
-    int global_rounds;  // silumation time in rounds
+    int GLOBAL_TIME_ROUNDs;  // silumation time in rounds
 
-    List<Grid> gridList;
-    int index_grid = 0;
-    Grid next_SINK_GRID; // set the first Grid "A1" as the next grid when simulation starts
+
+    List<Grid> GRID_LIST;
+    Grid NEXT_SINK_GRID; // set the first Grid "A1" as the next grid when simulation starts
 
 
     String Mode = "MDP";
     SinkNode SINK = new SinkNode();
 
+
     List<Animal> animalList;
-    List<Animal.AnimalPoint> animalPlotList;
+    List<Event> eventPlotList;
 
 
     public AnimalMonitoring(List<Animal> animalList) {
 
         int num_grids_each_line = 4;
         InitialGrids grids = new InitialGrids(num_grids_each_line);
-        this.gridList = grids.getGridList();
-        this.next_SINK_GRID = gridList.get(index_grid);
+        this.GRID_LIST = grids.getGridList();
+        this.NEXT_SINK_GRID = GRID_LIST.get(0);
 
 
         this.animalList = animalList;
-        this.animalPlotList = new ArrayList<>();
+        this.eventPlotList = new ArrayList<>();
 
 
-        NetworkPanel NMPanel = new NetworkPanel(SINK, animalPlotList, global_rounds);
+        NetworkPanel NMPanel = new NetworkPanel(SINK, eventPlotList);
         this.add(NMPanel);
         this.setBackground(Color.LIGHT_GRAY);
         this.createVisualizer(1500, 1000);
@@ -50,7 +51,7 @@ public class AnimalMonitoring extends JFrame {
 
         Timer t = new Timer();
         Task task = new Task(this);
-        t.schedule(task, 0, 20);
+        t.schedule(task, 0, 100);
     }
 
 
@@ -70,71 +71,84 @@ public class AnimalMonitoring extends JFrame {
         double samplingTimeOfSimulation = 600; // in seconds
 
         int index = 0;
-
+        int index_grid = 0;
         public Task(AnimalMonitoring model) {
             super();
             this.animalMonitor = model;
         }
 
         public void run() {
-            global_rounds = index++;
+            GLOBAL_TIME_ROUNDs = index++;
+            SINK.flyTime = GLOBAL_TIME_ROUNDs;
             newTimeInMilliSeconds = startTime + (long) samplingTimeOfSimulation
-                    * 1000 * global_rounds;
+                    * 1000 * GLOBAL_TIME_ROUNDs;
             Date newDate = new Date(newTimeInMilliSeconds);
 
-            System.out.print("newDate is " + newDate + '\n');
+            System.out.print("CurrentTime is " + newDate + '\n');
 
             //******************************* sensing animals ************************//
             int i = 0;
             while(i < animalList.size()) {
-                Animal.AnimalPoint point = animalList.get(i).getPoint();
 
-                if(newDate.equals(point.date)) {
-                    Grid grid = findWhichGrid(point.X, point.Y, gridList);
-                    grid.addEvent(point.animalID, global_rounds);
-                    animalList.get(i).removePoint();
-                    animalPlotList.add(point);
+                AnimalTrace trace = animalList.get(i).getTrace();
+
+                if(newDate.equals(trace.getDate())) {
+                    Grid grid = findWhichGrid(trace.getX(), trace.getY(), GRID_LIST);
+                    int current_round = GLOBAL_TIME_ROUNDs;
+                    Event event = new Event(trace, current_round, Event.INITIAL_REWARD);
+
+                    if(grid.isEvent(event)) {
+                        grid.addEvent(event);
+                        animalList.get(i).removeTrace();
+                        SINK.addNumEventsSensed();
+                    }
+
                 }
                 i++;
             }
-//            animalPlotList.clear();
 
             //******************************* sensing animals ************************//
 
             double tmpDis_SINK = findDistanceBetweenTwoPoints(SINK.getX(), SINK.getY(),
-                    next_SINK_GRID.getX(), next_SINK_GRID.getY());
+                    NEXT_SINK_GRID.getX(), NEXT_SINK_GRID.getY());
 
             if(tmpDis_SINK > SINK.getSpeed()) {
-                double Direc_X = (next_SINK_GRID.getX() - SINK.getX())/tmpDis_SINK;
-                double Direc_Y = (next_SINK_GRID.getY() - SINK.getY())/tmpDis_SINK;
+                double Direc_X = (NEXT_SINK_GRID.getX() - SINK.getX())/tmpDis_SINK;
+                double Direc_Y = (NEXT_SINK_GRID.getY() - SINK.getY())/tmpDis_SINK;
                 SINK.setX(SINK.getX() + SINK.getSpeed()*Direc_X);
                 SINK.setY(SINK.getY() + SINK.getSpeed()* Direc_Y);
             }
             else { // UAV gets the collection point, update everything, VOI, next Grid
-                // next_SINK_GRID is current Grid
+                // NEXT_SINK_GRID is current Grid
                 index_grid++;
 
-                double[] events_info = next_SINK_GRID.collectEvents(global_rounds);
+                int current_round = GLOBAL_TIME_ROUNDs;
+                double[] events_info = NEXT_SINK_GRID.collectEvents(current_round);
                 System.out.println(events_info[0] + " " + events_info[1] + " " + events_info[2] +
                         " " + events_info[3] + " " + events_info[4] + '\n');
 
                 // events_info shape: double[] = [init_rewards, real_rewards,
                 // num_total_events, num_collected_events, timeDelay]
-                next_SINK_GRID.clearEvents();
+                NEXT_SINK_GRID.clearEvents();  // clear events in this Grid
 
-                SINK.update(next_SINK_GRID.getX(), next_SINK_GRID.getY(),
-                        events_info[1], next_SINK_GRID);
+                SINK.update(NEXT_SINK_GRID.getX(), NEXT_SINK_GRID.getY(),
+                        events_info[1], NEXT_SINK_GRID, (int)events_info[3], events_info[4]);
 
                 SINK.updateQvalues_onPath(events_info[0], 0.5, 0.8);
 
-                if(index_grid < gridList.size() && Mode.equals("MDP")) {
-                    next_SINK_GRID = gridList.get(index_grid);
+                if(index_grid < GRID_LIST.size() && Mode.equals("MDP")) {
+                    NEXT_SINK_GRID = GRID_LIST.get(index_grid);
                 }
-                else next_SINK_GRID = SINK.nextGrid_probability();
+                else NEXT_SINK_GRID = SINK.nextGrid_probability();
             }
-//            System.out.println(SINK.getVOI() + '\n');
-            repaint();
 
+
+            eventPlotList.clear();
+            for(int j = 0; j < GRID_LIST.size(); j++) {
+
+                eventPlotList.addAll(GRID_LIST.get(j).getEventList());
+            }
+            repaint();
         }
     }
 
@@ -148,19 +162,19 @@ public class AnimalMonitoring extends JFrame {
                 + Math.pow((y2 - y1), 2));
     }
 
-    Grid findWhichGrid(double x1, double y1, List<Grid> gridList) {
+    Grid findWhichGrid(double x1, double y1, List<Grid> GRID_LIST) {
         int dis = Integer.MAX_VALUE;
         int index = 0;
-        for(int i = 0; i < gridList.size(); i++) {
-            int d = (int)Math.sqrt(Math.pow((gridList.get(i).getX() - x1), 2)
-                    + Math.pow((gridList.get(i).getY() - y1), 2));
+        for(int i = 0; i < GRID_LIST.size(); i++) {
+            int d = (int)Math.sqrt(Math.pow((GRID_LIST.get(i).getX() - x1), 2)
+                    + Math.pow((GRID_LIST.get(i).getY() - y1), 2));
             if(d < dis) {
                 dis = d;
                 index = i;
             }
         }
 
-        return gridList.get(index);
+        return GRID_LIST.get(index);
     }
 
 }
