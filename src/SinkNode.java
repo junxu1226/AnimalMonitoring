@@ -73,24 +73,29 @@ public class SinkNode {
         }
     }
 
-    public void updateQvaluesGreedy (double REWARDS, double alpha, double discount)
-    {
-        List<Grid> pathList = path.toList();
-        int index = pathList.size() - 1;
-
-        if(index == 0) { return; }
-
-        Grid curr = pathList.get(index);
-        Grid prev = pathList.get(index-1);
-        int neigh_index = prev.getNeighbors().indexOf(curr);
-
-        double maxQvalue = getMaxQvalue(curr);
-        double oldQvalue = prev.getQvalues()[neigh_index];
-
-        double newQvalue = oldQvalue + alpha * (REWARDS + discount * maxQvalue - oldQvalue);
-        prev.setQvalues(neigh_index, newQvalue);
-
-    }
+//    public void updateGreedy (double REWARDS, int grid_index, double[] greedyValues)
+//    {
+//
+//        List<Grid> pathList = path.toList();
+//        int index = pathList.size() - 1;
+//
+//        if(REWARDS == 0) {
+//            greedyValues[grid_index] = Math.max(10.0, (REWARDS + ));
+//        }
+//
+//        if(index == 0) { return; }
+//
+//        Grid curr = pathList.get(index);
+//        Grid prev = pathList.get(index-1);
+//        int neigh_index = prev.getNeighbors().indexOf(curr);
+//
+//        double maxQvalue = getMaxQvalue(curr);
+//        double oldQvalue = prev.getQvalues()[neigh_index];
+//
+//        double newQvalue = oldQvalue + alpha * (REWARDS + discount * maxQvalue - oldQvalue);
+//        prev.setQvalues(neigh_index, newQvalue);
+//
+//    }
 
 
     public double getVOI() {
@@ -120,40 +125,25 @@ public class SinkNode {
         return path.peek_tail();
     }
 
-    public Grid nextGrid_maxQvalueGreedy() {
+    public Grid nextGrid_Greedy() {
         Grid current = this.getCurrentGrid();
-        int index = 0;
-        double[] Q = current.getQvalues();
+
+        Grid max = current;
+
         int numDirections = current.getNeighbors().size();
-        double number = Q[0];
-        int numSameValues = 1;
+
         for(int i = 0; i < numDirections; i++) {
-            if(number < Q[i]) {
-                number = Q[i];
-                index = i;
-                numSameValues = 1;
+            if(current.getNeighbors().get(i).greedyValue > max.greedyValue) {
+                max = current.getNeighbors().get(i);
             }
-            else if(number == Q[i]) { numSameValues++; }
         }
 
-//        if(numSameValues > 1) {
-//
-//            int ran = (int)(Math.random() * numSameValues);
-//
-//            for(int i = 0; i < numDirections; i++) {
-//                if(Q[index] == Q[i]) {
-//
-//                    if(ran == 0) { return current.getNeighbors().get(i); }
-//                    ran--;
-//                }
-//            }
-//
-//        }
-        // do random selection if Q values in all actions are 0.0
-//        if(index == 0 && Q[0] == 0.0) {
-//
-//        }
-        return current.getNeighbors().get(index);
+        if(max.greedyValue == 0.0) {
+            int index = (int)(Math.random() * numDirections);
+            return current.getNeighbors().get(index);
+        }
+
+        return max;
     }
 
     public Grid nextGrid_maxQvalueMDP() {
@@ -161,6 +151,14 @@ public class SinkNode {
         int index = 0;
         double[] Q = current.getQvalues();
         int numDirections = current.getNeighbors().size();
+
+        int ran = (int)(Math.random() * 100) + 1;
+
+        if(ran <= 20) {
+            index = (int)(Math.random() * numDirections);
+            return current.getNeighbors().get(index);
+        }
+
         double number = Q[0];
         for(int i = 0; i < numDirections; i++) {
             if(number < Q[i]) {
@@ -170,7 +168,7 @@ public class SinkNode {
         }
         // do random selection if Q values in all actions are 0.0
         if(index == 0 && Q[0] == 0.0) {
-            index = (int)(Math.random() * (numDirections - 0));
+            index = (int)(Math.random() * numDirections);
         }
         return current.getNeighbors().get(index);
     }
@@ -195,7 +193,7 @@ public class SinkNode {
         int sum = 0;
 
         for (int i = 0; i < numDirections; i++) {
-            ranges[i] = (int)(Math.max(Q[i],0.5) * 10);
+            ranges[i] = (int)(Math.max(Q[i],0.3) * 10);
             sum += ranges[i];
         }
 

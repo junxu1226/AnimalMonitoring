@@ -24,7 +24,7 @@ public class AnimalMonitoring extends JFrame {
     Grid NEXT_SINK_GRID; // set the first Grid "A1" as the next grid when simulation starts
 
 
-    String Mode = "Greedy";
+    String Mode = "MDP-E";
     SinkNode SINK = new SinkNode();
 
 
@@ -70,7 +70,7 @@ public class AnimalMonitoring extends JFrame {
 
     class Task extends TimerTask {
         AnimalMonitoring animalMonitor;
-        Date theBeginTime = new Date(113, 00, 22, 00, 00, 00);
+        Date theBeginTime = new Date(113, 02, 01, 00, 00, 00);
         long startTime = theBeginTime.getTime();
         long newTimeInMilliSeconds = startTime;
         double samplingTimeOfSimulation = 600; // in seconds
@@ -94,6 +94,11 @@ public class AnimalMonitoring extends JFrame {
             //******************************* sensing animals ************************//
             int i = 0;
             while(i < animalList.size()) {
+
+                if(animalList.get(i).getTrajectory().isEmpty()) {
+                    i++;
+                    continue;
+                }
 
                 AnimalTrace trace = animalList.get(i).getLastTrace();
 
@@ -147,8 +152,10 @@ public class AnimalMonitoring extends JFrame {
                 SINK.update(NEXT_SINK_GRID.getX(), NEXT_SINK_GRID.getY(),
                         events_info[1], NEXT_SINK_GRID, (int)events_info[3], events_info[4]);
 
-//                SINK.updateQvaluesMDPonPath(events_info[0], 0.5, 0.8);
-                SINK.updateQvaluesGreedy(events_info[1], 0.5, 0.8);
+                SINK.updateQvaluesMDPonPath(events_info[0], 0.5, 0.8);
+                if(events_info[1] > 0) {NEXT_SINK_GRID.greedyValue = 25.0;}
+                else NEXT_SINK_GRID.greedyValue = Math.max(NEXT_SINK_GRID.greedyValue - 1.0, 0.0);
+
                 System.out.println("Q VALUES: " + Arrays.toString(NEXT_SINK_GRID.getQvalues()));
 
                 // ******************* NEXT_SINK_GRID path planning ***********************//
@@ -159,7 +166,7 @@ public class AnimalMonitoring extends JFrame {
                     }
                     else NEXT_SINK_GRID = SINK.nextGrid_probability();
                 }
-                if(Mode.equals("MDP-epsilon")) {
+                if(Mode.equals("MDP-E")) {
                     if( index_grid < ROUND_GRID_LIST.size() ) {
                         NEXT_SINK_GRID = ROUND_GRID_LIST.get(index_grid);
                     }
@@ -173,10 +180,11 @@ public class AnimalMonitoring extends JFrame {
                 }
                 else if(Mode.equals("Greedy")) {
 
-                    if( index_grid < ROUND_GRID_LIST.size() ) {
-                        NEXT_SINK_GRID = ROUND_GRID_LIST.get(index_grid);
-                    }
-                    else NEXT_SINK_GRID = SINK.nextGrid_maxQvalueGreedy();
+//                    if( index_grid < ROUND_GRID_LIST.size() ) {
+//                        NEXT_SINK_GRID = ROUND_GRID_LIST.get(index_grid);
+//                    }
+//                    else NEXT_SINK_GRID = SINK.nextGrid_Greedy();
+                    NEXT_SINK_GRID = SINK.nextGrid_Greedy();
                 }
                 else if(Mode.equals("Random")) {
 
@@ -207,7 +215,7 @@ public class AnimalMonitoring extends JFrame {
             } catch (IOException e) { e.printStackTrace(); }
 
 
-            if(SINK.getNumEventsSensed() >= 200) {
+            if(SINK.getNumEventsSensed() >= 100) {
 
                 File f2 = new File(Mode + "_time_delay_1.txt");
                 try {

@@ -23,8 +23,8 @@ public class File_Reader {
     Animal MA = new Animal("MA");
     Animal MB = new Animal("MB");
 
-    Date theBeginTime = new Date(113, 00, 22, 00, 00, 00);
-    Date theEndTime = new Date(113, 03, 05, 00, 00, 00);
+    Date theBeginTime = new Date(113, 02, 01, 00, 00, 00);
+    Date theEndTime = new Date(113, 02, 30, 00, 00, 00);
 
     public File_Reader() {
         File f = new File("pandas.txt");

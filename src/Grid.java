@@ -7,11 +7,12 @@ public class Grid {
     private String name;
     private double headX;
     private double headY;
-    private double[] Qvalues = {10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0}; // size: NUM_DIRECTIONS
+    private double[] Qvalues = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // size: NUM_DIRECTIONS
     private List<Grid> neighbors;
 //    private Date currentTime;
     private List<Event> eventList;
-    private Queue<Event> appearQueue;  // animal is sensed, but may not be treated as event, like continious appearing
+    private Queue<Event> eventQueue;  // animal is sensed, but may not be treated as event, like continious appearing
+    public double greedyValue = 0.0;
 
     Grid(String name, double x, double y) {
         this.name = name;
@@ -19,7 +20,7 @@ public class Grid {
         this.headY = y;
         this.neighbors = new ArrayList<>();
         this.eventList = new ArrayList<Event>();
-        this.appearQueue = new Queue<Event>(11);
+        this.eventQueue = new Queue<Event>(20);
     }
 
     public String getGridName() {
@@ -45,7 +46,10 @@ public class Grid {
     }
     public void setNeighbors(List<Grid> neighbors) { this.neighbors = neighbors; }
 
-    public void addEvent(Event event) { this.eventList.add(event); }
+    public void addEvent(Event event) {
+        this.eventList.add(event);
+        this.eventQueue.enqueue(event);
+    }
 
     public boolean isEvent(Event event) {
 
@@ -58,24 +62,24 @@ public class Grid {
             i++;
         }
 
-        List<Event> appearList = appearQueue.toList();
+        List<Event> appearList = eventQueue.toList();
         i = appearList.size() - 1;
         while(i > 0) {
             Event e = appearList.get(i);
-            if( (event.getAnimalID().equals(e.getAnimalID())) && (event.getStartRound() - e.getStartRound()) < 10 ) {
-                return true;
+            if( (event.getAnimalID().equals(e.getAnimalID())) && (event.getStartRound() - e.getStartRound()) <= Event.IS_EVENT_AGAIN_TIME ) {
+                return false;
             }
             i--;
         }
-        appearQueue.enqueue(event);
-        return false;
+
+        return true;
     }
 
     public double[] collectEvents(int current_round) {  // VOI =  Init * e^{-B * t}
         double[] events = new double[5];
 
         int num_events_collected = 0;
-        double rewards = 0;
+        double rewards = 0.0;
         double init_rewards = -0.2;
         double timeDelay = 0.0;
         double B_parameter = 1.0 / 60.0;
