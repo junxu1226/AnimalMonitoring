@@ -11,8 +11,29 @@ params = {'legend.fontsize': 'x-large',
          'ytick.labelsize':'x-large'}
 pylab.rcParams.update(params)
 
+date_parser = pd.tseries.tools.to_datetime
+
+parse_dates=[0], infer_datetime_format=True,
+df=pd.read_csv(f, index_col = False, header=0, usecols=[1, 5, 6],
+parse_dates=[0], infer_datetime_format=True)
+
+dfa=df.sort(columns=['timestamp'])
+
+N=30000
+x=df['location-lat']
+y=df['location-long']
+x=x[:N]
+y=y[:N]
+plt.plot(x,y)
+plt.show()
+
+
+
 df = pd.read_csv('Leopard11.txt', sep=" ", header=None)
 df.columns=['station', 'node', 'ind', 'year', 'month', 'date', 'hour', 'minute', 'X', 'Y', 'ID']
+
+
+
 
 # df['month'] = 1
 # dfa = df[df['ID'] == 'FA']
