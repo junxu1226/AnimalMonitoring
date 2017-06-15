@@ -9,7 +9,7 @@ public class Event {
 
     public static final double INITIAL_REWARD = 10.0;
     public static final double IS_EVENT_AGAIN_TIME = 24;
-    public static final double EVENT_VALID_TIME = 144;
+    public static final double EVENT_VALID_TIME = 72;
 
     private double init_rewards;
     private int start_round;

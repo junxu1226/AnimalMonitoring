@@ -70,7 +70,9 @@ public class AnimalMonitoring extends JFrame {
 
     class Task extends TimerTask {
         AnimalMonitoring animalMonitor;
-        Date theBeginTime = new Date(113, 02, 01, 00, 00, 00);
+//        Date theBeginTime = new Date(113, 02, 01, 00, 00, 00);
+        Date theBeginTime = new Date(109, 11, 1, 4, 00, 00);
+
         long startTime = theBeginTime.getTime();
         long newTimeInMilliSeconds = startTime;
         double samplingTimeOfSimulation = 600; // in seconds
@@ -152,7 +154,9 @@ public class AnimalMonitoring extends JFrame {
                 SINK.update(NEXT_SINK_GRID.getX(), NEXT_SINK_GRID.getY(),
                         events_info[1], NEXT_SINK_GRID, (int)events_info[3], events_info[4]);
 
-                SINK.updateQvaluesMDPonPath(events_info[0], 0.5, 0.8);
+                SINK.updateQvaluesMDPonPath(events_info[0], 0.5, 0.5);
+//                SINK.updateQvaluesMDP_E(events_info[0], 0.5, 0.5);
+
                 if(events_info[1] > 0) {NEXT_SINK_GRID.greedyValue = 25.0;}
                 else NEXT_SINK_GRID.greedyValue = Math.max(NEXT_SINK_GRID.greedyValue - 1.0, 0.0);
 
@@ -170,7 +174,7 @@ public class AnimalMonitoring extends JFrame {
                     if( index_grid < ROUND_GRID_LIST.size() ) {
                         NEXT_SINK_GRID = ROUND_GRID_LIST.get(index_grid);
                     }
-                    else NEXT_SINK_GRID = SINK.nextGrid_maxQvalueMDP();
+                    else NEXT_SINK_GRID = SINK.nextGrid_maxQvalueMDP(20);  // percent = 20, 20% do random, [1-100]
                 }
 
                 else if(Mode.equals("TSP")) {
@@ -188,7 +192,7 @@ public class AnimalMonitoring extends JFrame {
                 }
                 else if(Mode.equals("Random")) {
 
-                    NEXT_SINK_GRID = SINK.nextGrid_Random();
+                    NEXT_SINK_GRID = SINK.nextGrid_Random(GRID_LIST);
                 }
 
 
@@ -206,7 +210,7 @@ public class AnimalMonitoring extends JFrame {
 
             repaint();
 
-            File f1 = new File(Mode + "_VOI_1.txt");
+            File f1 = new File(Mode + "_VOI_6.txt");
             try {
                 FileOutputStream writeOut = new FileOutputStream(f1,true);
                 PrintWriter out = new PrintWriter(writeOut);
@@ -214,10 +218,10 @@ public class AnimalMonitoring extends JFrame {
                 out.close();
             } catch (IOException e) { e.printStackTrace(); }
 
+//            SINK.getNumEventsSensed()
+            if(GLOBAL_TIME_ROUNDs > 1000) {
 
-            if(SINK.getNumEventsSensed() >= 100) {
-
-                File f2 = new File(Mode + "_time_delay_1.txt");
+                File f2 = new File(Mode + "_time_delay_6.txt");
                 try {
                     FileOutputStream writeOut = new FileOutputStream(f2,true);
                     PrintWriter out = new PrintWriter(writeOut);
@@ -238,7 +242,8 @@ public class AnimalMonitoring extends JFrame {
     }
 
     public static void main(String[] args) throws IOException {
-        File_Reader animals = new File_Reader();
+//        File_Reader animals = new File_Reader();
+        Reader_Vultures animals = new Reader_Vultures();
         AnimalMonitoring animalMonitor = new AnimalMonitoring(animals.animalList);
     }
 

@@ -82,7 +82,7 @@ public class Grid {
         double rewards = 0.0;
         double init_rewards = -0.2;
         double timeDelay = 0.0;
-        double B_parameter = 1.0 / 60.0;
+        double B_parameter = 2.0 / 60.0;
 
 
         int i = eventList.size();

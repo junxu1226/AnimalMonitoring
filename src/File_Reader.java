@@ -27,7 +27,7 @@ public class File_Reader {
     Date theEndTime = new Date(113, 02, 30, 00, 00, 00);
 
     public File_Reader() {
-        File f = new File("pandas.txt");
+        File f = new File("./data/pandas.txt"); // vultures
         this.animalList = new ArrayList<>();
         this.animalList.add(FA);
         this.animalList.add(FB);

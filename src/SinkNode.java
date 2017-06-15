@@ -64,12 +64,31 @@ public class SinkNode {
             double maxQvalue = getMaxQvalue(curr);
             double oldQvalue = prev.getQvalues()[neigh_index];
 
-            double dis = Math.pow(0.6, pathList.size() - 1 - index);
+            double dis = Math.pow(0.3, pathList.size() - 1 - index);
 
             double newQvalue = oldQvalue + dis * alpha * (INIT_REWARDS + discount * maxQvalue - oldQvalue);
             prev.setQvalues(neigh_index, newQvalue);
 
             index--;
+        }
+    }
+
+    public void updateQvaluesMDP_E (double INIT_REWARDS, double alpha, double discount)
+    {
+        List<Grid> pathList = path.toList();
+        int index = pathList.size() - 1;
+
+        if(index > 0) {
+            Grid curr = pathList.get(index);
+            Grid prev = pathList.get(index-1);
+
+            int neigh_index = prev.getNeighbors().indexOf(curr);
+            double maxQvalue = getMaxQvalue(curr);
+            double oldQvalue = prev.getQvalues()[neigh_index];
+
+
+            double newQvalue = oldQvalue + alpha * (INIT_REWARDS + discount * maxQvalue - oldQvalue);
+            prev.setQvalues(neigh_index, newQvalue);
         }
     }
 
@@ -146,7 +165,7 @@ public class SinkNode {
         return max;
     }
 
-    public Grid nextGrid_maxQvalueMDP() {
+    public Grid nextGrid_maxQvalueMDP(int percent) {
         Grid current = this.getCurrentGrid();
         int index = 0;
         double[] Q = current.getQvalues();
@@ -154,7 +173,7 @@ public class SinkNode {
 
         int ran = (int)(Math.random() * 100) + 1;
 
-        if(ran <= 20) {
+        if(ran <= percent) {
             index = (int)(Math.random() * numDirections);
             return current.getNeighbors().get(index);
         }
@@ -173,15 +192,22 @@ public class SinkNode {
         return current.getNeighbors().get(index);
     }
 
-    public Grid nextGrid_Random() {
-        Grid current = this.getCurrentGrid();
-        int index = 0;
+    public Grid nextGrid_Random(List<Grid> GRID_LIST) {
 
-        int numDirections = current.getNeighbors().size();
+        int length = GRID_LIST.size();
+        int index = (int)(Math.random() * length);
+        return GRID_LIST.get(index);
 
-        index = (int)(Math.random() * numDirections);
 
-        return current.getNeighbors().get(index);
+
+//        Grid current = this.getCurrentGrid();
+//        int index = 0;
+//
+//        int numDirections = current.getNeighbors().size();
+//
+//        index = (int)(Math.random() * numDirections);
+
+//        return current.getNeighbors().get(index);
     }
 
     public Grid nextGrid_probability() {
@@ -193,7 +219,7 @@ public class SinkNode {
         int sum = 0;
 
         for (int i = 0; i < numDirections; i++) {
-            ranges[i] = (int)(Math.max(Q[i],0.3) * 10);
+            ranges[i] = (int)(Math.max(Q[i],0.2) * 10);
             sum += ranges[i];
         }
 
