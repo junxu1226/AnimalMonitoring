@@ -80,7 +80,7 @@ public class Grid {
 
         int num_events_collected = 0;
         double rewards = 0.0;
-        double init_rewards = -0.2;
+        double init_rewards = -1;
         double timeDelay = 0.0;
         double B_parameter = 2.0 / 60.0;
 

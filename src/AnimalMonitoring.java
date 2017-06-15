@@ -71,7 +71,7 @@ public class AnimalMonitoring extends JFrame {
     class Task extends TimerTask {
         AnimalMonitoring animalMonitor;
 //        Date theBeginTime = new Date(113, 02, 01, 00, 00, 00);
-        Date theBeginTime = new Date(109, 11, 1, 4, 00, 00);
+        Date theBeginTime = new Date(108, 03, 01, 00, 00, 00);
 
         long startTime = theBeginTime.getTime();
         long newTimeInMilliSeconds = startTime;
@@ -219,7 +219,7 @@ public class AnimalMonitoring extends JFrame {
             } catch (IOException e) { e.printStackTrace(); }
 
 //            SINK.getNumEventsSensed()
-            if(GLOBAL_TIME_ROUNDs > 1000) {
+            if(GLOBAL_TIME_ROUNDs > 1500) {
 
                 File f2 = new File(Mode + "_time_delay_6.txt");
                 try {
