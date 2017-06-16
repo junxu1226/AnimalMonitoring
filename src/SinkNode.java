@@ -64,7 +64,7 @@ public class SinkNode {
             double maxQvalue = getMaxQvalue(curr);
             double oldQvalue = prev.getQvalues()[neigh_index];
 
-            double dis = Math.pow(0.3, pathList.size() - 1 - index);
+            double dis = Math.pow(0.2, pathList.size() - 1 - index);
 
             double newQvalue = oldQvalue + dis * alpha * (INIT_REWARDS + discount * maxQvalue - oldQvalue);
             prev.setQvalues(neigh_index, newQvalue);

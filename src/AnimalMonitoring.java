@@ -24,7 +24,7 @@ public class AnimalMonitoring extends JFrame {
     Grid NEXT_SINK_GRID; // set the first Grid "A1" as the next grid when simulation starts
 
 
-    String Mode = "MDP-E";
+    String Mode = "Random";
     SinkNode SINK = new SinkNode();
 
 
@@ -154,10 +154,10 @@ public class AnimalMonitoring extends JFrame {
                 SINK.update(NEXT_SINK_GRID.getX(), NEXT_SINK_GRID.getY(),
                         events_info[1], NEXT_SINK_GRID, (int)events_info[3], events_info[4]);
 
-                SINK.updateQvaluesMDPonPath(events_info[0], 0.5, 0.5);
+//                SINK.updateQvaluesMDPonPath(events_info[0], 0.5, 0.5);
 //                SINK.updateQvaluesMDP_E(events_info[0], 0.5, 0.5);
 
-                if(events_info[1] > 0) {NEXT_SINK_GRID.greedyValue = 25.0;}
+                if(events_info[1] > 0) {NEXT_SINK_GRID.greedyValue = 37.0;}
                 else NEXT_SINK_GRID.greedyValue = Math.max(NEXT_SINK_GRID.greedyValue - 1.0, 0.0);
 
                 System.out.println("Q VALUES: " + Arrays.toString(NEXT_SINK_GRID.getQvalues()));
@@ -210,7 +210,7 @@ public class AnimalMonitoring extends JFrame {
 
             repaint();
 
-            File f1 = new File(Mode + "_VOI_6.txt");
+            File f1 = new File(Mode + "_VOI_3.txt");
             try {
                 FileOutputStream writeOut = new FileOutputStream(f1,true);
                 PrintWriter out = new PrintWriter(writeOut);
@@ -219,9 +219,9 @@ public class AnimalMonitoring extends JFrame {
             } catch (IOException e) { e.printStackTrace(); }
 
 //            SINK.getNumEventsSensed()
-            if(GLOBAL_TIME_ROUNDs > 1500) {
+            if(GLOBAL_TIME_ROUNDs > 1000) {
 
-                File f2 = new File(Mode + "_time_delay_6.txt");
+                File f2 = new File(Mode + "_time_delay_3.txt");
                 try {
                     FileOutputStream writeOut = new FileOutputStream(f2,true);
                     PrintWriter out = new PrintWriter(writeOut);
